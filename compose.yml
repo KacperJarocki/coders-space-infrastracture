@@ -1,0 +1,72 @@
+volumes:
+  postgres-data:
+services:
+  watchtower:
+    image: containrrr/watchtower
+    command:
+      - "--label-enable"
+      - "--interval"
+      - "30"
+      - "--stop-timeout"
+      - "60s"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  db:
+    container_name: db
+    image: ghcr.io/kacperjarocki/coders-space-db:latest
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: coders_space
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    restart: always
+  backend:
+    image: ghcr.io/kacperjarocki/coders-space-backend:latest
+    depends_on:
+      - db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/coders_space
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 3
+    labels:
+      - "traefik.http.routers.backend.rule=Host(`backend.localhost`)"
+      - "com.centurylinklabs.watchtower.enable=true"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8080/api/v1/clients/"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  frontend:
+    image: ghcr.io/kacperjarocki/coders-space-frontend:latest
+    depends_on:
+      - backend
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 5
+    labels:
+      - "traefik.http.routers.frontend.rule=Host(`localhost`)"
+      - "traefik.http.services.frontend.loadbalancer.sticky.cookie=true"
+      - "traefik.http.services.frontend.loadbalancer.sticky.cookie.name=myfrontend-session"
+      - "com.centurylinklabs.watchtower.enable=true"
+  webserver:
+    container_name: webserver
+    image: traefik:v3.1
+    command:
+      - "--api.insecure=true"
+      - "--entrypoints.web.address=:80"
+      - "--entryPoints.websecure.address=:443"
+      - "--providers.docker"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
