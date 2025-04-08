@@ -24,9 +24,12 @@ jobs:
           sed -i "s|coders-space-frontend:.*|coders-space-frontend:${COMMIT_HASH}|" compose.yml
           sed -i "s|coders-space-db:.*|coders-space-db:${COMMIT_HASH}|" compose.yml
       - name: Commit and Push Changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPO_B_TOKEN }}
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git add compose.yml
-          git commit -m "Update image tag to ${COMMIT_SHA}"
+          git commit -m "Update image tag to ${COMMIT_HASH}"
           git push
+
