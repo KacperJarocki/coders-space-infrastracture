@@ -15,12 +15,14 @@ jobs:
 
       - name: Get Commit SHA from Event
         run: echo "COMMIT_SHA=${{ github.event.client_payload.commit_sha }}" >> $GITHUB_ENV
+      - name: Set short commit hash
+        run: echo "COMMIT_HASH=$(git rev-parse --short $COMIT_SHA)" >> $GITHUB_ENV
 
       - name: Update compose.yml
         run: |
-          sed -i "s|coders-space-backend:.*|coders-space-backend:${COMMIT_SHA}|" compose.yml
-          sed -i "s|coders-space-frontend:.*|coders-space-frontend:${COMMIT_SHA}|" compose.yml
-          sed -i "s|coders-space-db:.*|coders-space-db:${COMMIT_SHA}|" compose.yml
+          sed -i "s|coders-space-backend:.*|coders-space-backend:${COMMIT_HASH}|" compose.yml
+          sed -i "s|coders-space-frontend:.*|coders-space-frontend:${COMMIT_HASH}|" compose.yml
+          sed -i "s|coders-space-db:.*|coders-space-db:${COMMIT_HASH}|" compose.yml
       - name: Commit and Push Changes
         run: |
           git config user.name "GitHub Actions"
