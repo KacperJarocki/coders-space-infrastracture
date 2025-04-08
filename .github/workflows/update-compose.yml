@@ -1,0 +1,30 @@
+name: Update Docker Compose
+
+on:
+  repository_dispatch:
+    types:
+      - docker_image_published
+
+jobs:
+  update-compose:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Get Commit SHA from Event
+        run: echo "COMMIT_SHA=${{ github.event.client_payload.commit_sha }}" >> $GITHUB_ENV
+
+      - name: Update compose.yml
+        run: |
+          sed -i "s|coders-space-backend:.*|coders-space-backend:${COMMIT_SHA}|" compose.yml
+          sed -i "s|coders-space-frontend:.*|coders-space-frontend:${COMMIT_SHA}|" compose.yml
+          sed -i "s|coders-space-db:.*|coders-space-db:${COMMIT_SHA}|" compose.yml
+      - name: Commit and Push Changes
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add docker-compose.yml
+          git commit -m "Update image tag to ${COMMIT_SHA}"
+          git push
