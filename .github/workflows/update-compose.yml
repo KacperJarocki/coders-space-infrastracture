@@ -16,7 +16,7 @@ jobs:
       - name: Get Commit SHA from Event
         run: echo "COMMIT_SHA=${{ github.event.client_payload.commit_sha }}" >> $GITHUB_ENV
       - name: Set short commit hash
-        run: echo "COMMIT_HASH=$(git rev-parse --short $COMIT_SHA)" >> $GITHUB_ENV
+        run: echo "COMMIT_HASH=$(git rev-parse --short $COMMIT_SHA)" >> $GITHUB_ENV
 
       - name: Update compose.yml
         run: |
@@ -31,5 +31,5 @@ jobs:
           git config user.email "actions@github.com"
           git add compose.yml
           git commit -m "Update image tag to ${COMMIT_HASH}"
-          git push
+          git push https://<username>:${{ secrets.REPO_TOKEN }}@github.com/KacperJarocki/coders-space-infrastructure.git
 
