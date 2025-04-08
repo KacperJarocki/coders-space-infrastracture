@@ -31,5 +31,5 @@ jobs:
           git config user.email "actions@github.com"
           git add compose.yml
           git commit -m "Update image tag to ${COMMIT_HASH}"
-          git push https://<username>:${{ secrets.REPO_TOKEN }}@github.com/KacperJarocki/coders-space-infrastructure.git
+          git push https://<username>:${{ secrets.REPO_TOKEN }}@github.com/kacperjarocki/coders-space-infrastructure.git
 
