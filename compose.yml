@@ -1,5 +1,6 @@
 volumes:
   postgres-data:
+services:
   db:
     container_name: db
     image: ghcr.io/kacperjarocki/coders-space-db:b8a6247
