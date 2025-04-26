@@ -2,7 +2,7 @@ volumes:
   postgres-data:
 services:
   db:
-    container_name: db
+    container_name: db2
     image: ghcr.io/kacperjarocki/coders-space-db:b8a6247
     environment:
       POSTGRES_USER: root
@@ -16,7 +16,7 @@ services:
     depends_on:
       - db
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/coders_space
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db2:5432/coders_space
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=root
     restart: always
@@ -45,7 +45,6 @@ services:
       - "traefik.http.services.frontend.loadbalancer.sticky.cookie=true"
       - "traefik.http.services.frontend.loadbalancer.sticky.cookie.name=myfrontend-session"
   webserver:
-    container_name: webserver
     image: traefik:v3.1
     command:
       - "--api.insecure=true"
