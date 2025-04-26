@@ -52,7 +52,7 @@ services:
       - "--entryPoints.websecure.address=:443"
       - "--providers.docker"
     ports:
-      - "80:8081"
-      - "8080:8082"
+      - "8081:80"
+      - "8082:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
