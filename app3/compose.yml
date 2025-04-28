@@ -22,7 +22,7 @@ services:
     restart: always
     deploy:
       mode: replicated
-      replicas: 3
+      replicas: 1
     labels:
       - "traefik.http.routers.backend.rule=Host(`backend.localhost`)"
     healthcheck:
@@ -39,4 +39,4 @@ services:
     restart: always
     deploy:
       mode: replicated
-      replicas: 2
+      replicas: 1
