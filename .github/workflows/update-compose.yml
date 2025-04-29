@@ -2,8 +2,7 @@ name: Update Docker Compose
 
 on:
   repository_dispatch:
-    types:
-      - docker_image_published
+    types: [docker_image_published]
 
 jobs:
   update-compose:
@@ -13,23 +12,28 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Get Commit SHA from Event
-        run: echo "COMMIT_SHA=${{ github.event.client_payload.commit_sha }}" >> $GITHUB_ENV
-      - name: Set short commit hash
-        run: echo "COMMIT_HASH=$(git rev-parse --short $COMMIT_SHA)" >> $GITHUB_ENV
-
-      - name: Update compose.yml
+      - name: Update compose.yml in correct path
         run: |
-          sed -i "s|coders-space-backend:.*|coders-space-backend:${COMMIT_HASH}|" compose.yml
-          sed -i "s|coders-space-frontend:.*|coders-space-frontend:${COMMIT_HASH}|" compose.yml
-          sed -i "s|coders-space-db:.*|coders-space-db:${COMMIT_HASH}|" compose.yml
+          CONTAINER_NAME="${{ github.event.client_payload.container_name }}"
+          IMAGE_TAG="${{ github.event.client_payload.image_tag }}"
+          APP_NAME="${{ github.event.client_payload.app_name }}"
+          COMPOSE_PATH="$APP_NAME/compose.yml"
+
+          echo "Updating $CONTAINER_NAME to tag $IMAGE_TAG in $COMPOSE_PATH"
+
+          if [ -f "$COMPOSE_PATH" ]; then
+            sed -i "s|\($CONTAINER_NAME:\).*|\1$IMAGE_TAG|" "$COMPOSE_PATH"
+          else
+            echo "ERROR: $COMPOSE_PATH does not exist"
+            exit 1
+          fi
+
       - name: Commit and Push Changes
         env:
           GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          git add compose.yml
-          git commit -m "Update image tag to ${COMMIT_HASH}"
-          git push https://${{ secrets.REPO_TOKEN }}@github.com/kacperjarocki/coders-space-infrastructure.git
-
+          git add .
+          git commit -m "Update ${{ github.event.client_payload.container_name }} image to tag ${{ github.event.client_payload.image_tag }} in ${{ github.event.client_payload.app_name }}"
+          git push https://${{ secrets.REPO_TOKEN }}@github.com/${{ github.repository }} HEAD:main
