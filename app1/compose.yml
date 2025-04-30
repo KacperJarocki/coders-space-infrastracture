@@ -33,7 +33,7 @@ services:
       start_period: 30s
 
   frontend:
-    image: ghcr.io/kacperjarocki/coders-space-frontend:b6891eb
+    image: ghcr.io/kacperjarocki/coders-space-frontend:f97a15e
     depends_on:
       - backend
     restart: always
